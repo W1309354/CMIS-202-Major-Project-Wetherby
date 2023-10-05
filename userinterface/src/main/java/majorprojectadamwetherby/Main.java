@@ -135,6 +135,8 @@ public class Main extends Application {
     }
 
     // Use a quicksort to sort the generated names alphabetically
+    // Efficient because it sepereates the array into two partitions, and seperates those partitions, and so on
+    // It sorts the individual partitions making it efficient
     private static void sortGeneratedNames(String[] namesToSort, int lo, int hi) {
         // Get the i and j for the sorting
         int i = lo;
