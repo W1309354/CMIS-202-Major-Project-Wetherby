@@ -1,0 +1,3 @@
+Course 1   New|Teacher|1|email@email.com|200|9am-5pm,   Adam|Wetherby|1|email@email.com|,new|student|2|email@email.com|,   Assignment 1|10.0f,
+Course 2      Adam|Wetherby|1|email@email.com|,   Assignment 2|25.0f,Assignment 1|50.0f,
+
