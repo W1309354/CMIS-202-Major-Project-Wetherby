@@ -11,7 +11,7 @@ The software generates random names.
 The software will be used on any type of computer with java installed and used when the user wants to generate random names.
 * How does the software work
 
-It generates random names based on change and rules.
+It generates random names based on chance and rules.
 * Why would anyone want to use the software over existing processes?
 
 The name generator runs on your computer locally unlike other options, and the generated names are easily saved to a text file.
