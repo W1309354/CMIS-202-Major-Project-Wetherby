@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Stack;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -21,7 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class Main extends Application {
+public class Main extends Application implements GeneratedNamesPath {
     // Scene variable
     private static Scene scene;
 
@@ -114,7 +115,7 @@ public class Main extends Application {
         generatedNames = new ArrayList<String>();
 
         // Get the file
-        File generatedNamesFile = new File("./src/GeneratedNames.txt");
+        File generatedNamesFile = GENERATED_NAMES_PATH;
 
         // Check if the file is valid
         if (!generatedNamesFile.exists() || generatedNamesFile.length() == 0) {
@@ -135,7 +136,8 @@ public class Main extends Application {
     }
 
     // Use a quicksort to sort the generated names alphabetically
-    // Efficient because it sepereates the array into two partitions, and seperates those partitions, and so on
+    // Efficient because it sepereates the array into two partitions, and seperates
+    // those partitions, and so on
     // It sorts the individual partitions making it efficient
     private static void sortGeneratedNames(String[] namesToSort, int lo, int hi) {
         // Get the i and j for the sorting
@@ -202,11 +204,30 @@ public class Main extends Application {
         // Sort the generated names array
         sortGeneratedNames(namesToSort, 0, generatedNames.size() - 1);
 
+        // Create a stack for all the sorted names
+        Stack<String> sortedNames = new Stack<String>();
         // This holds all the information to be saved
-        String saveInformation = String.join(",", namesToSort);
+
+        String saveInformation = "";
+
+        // Loop through each generated name in the array
+        for (int i = 0; i < generatedNames.size(); i++) {
+            // Add the name to the sorted names stack
+            sortedNames.push(namesToSort[i]);
+        }
+
+        // Loop through the stack
+        for (int i = 0; i < generatedNames.size(); i++) {
+            // Add the name to the save information string
+            if (i > 0 && i < generatedNames.size()) {
+                saveInformation += "," + sortedNames.pop();
+            } else {
+                saveInformation += sortedNames.pop();
+            }
+        }
 
         // Create a new file
-        File generatedNamesFile = new File("./src/GeneratedNames.txt");
+        File generatedNamesFile = GENERATED_NAMES_PATH;
         // Create a new print writer
         PrintWriter fileWriter = new PrintWriter(generatedNamesFile);
         // Print the save information into the file
