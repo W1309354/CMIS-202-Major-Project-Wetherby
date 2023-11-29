@@ -10,8 +10,6 @@ public class Letter {
     public Boolean isVowel;
     // Is it a consonant
     public Boolean isConsonant;
-    // The index of the letter in the alphabet
-    public int alphabetIndex;
 
     // Empty constructor
     public Letter() {
@@ -19,12 +17,11 @@ public class Letter {
     }
 
     // Constructor with all the information
-    public Letter(char lowerChar, char upperChar, Boolean isVowel, Boolean isConsonant, int alphabetIndex) {
+    public Letter(char lowerChar, char upperChar, Boolean isVowel, Boolean isConsonant) {
         this.lowerChar = lowerChar;
         this.upperChar = upperChar;
         this.isVowel = isVowel;
         this.isConsonant = isConsonant;
-        this.alphabetIndex = alphabetIndex;
     }
 
     // Methods to get attributes of the letter
@@ -42,9 +39,5 @@ public class Letter {
 
     public Boolean getIsConsonant() {
         return this.isConsonant;
-    }
-
-    public int getAlphabetIndex() {
-        return this.alphabetIndex;
     }
 }

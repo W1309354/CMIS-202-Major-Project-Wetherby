@@ -33,6 +33,8 @@ public class Main extends Application implements GeneratedNamesPath {
     private static NameGenerator nameGenerator = new NameGenerator();
     // ArrayList of generated names
     private static ArrayList<String> generatedNames;
+    // BST of initialized names
+    private static BinarySearchTree initialNames;
 
     // The background to show generated names
     private final Pane showNamesPane = new Pane();
@@ -41,10 +43,12 @@ public class Main extends Application implements GeneratedNamesPath {
     // The scrolling pane of the show names pane
     private final ScrollPane showNamesScrollPane = new ScrollPane();
 
+    // The background of the user input pane
+    private final Pane userInputPane = new Pane();
     // The background to generate names
-    final Pane generatePane = new Pane();
+    // final Pane generatePane = new Pane();
     // The button used to detect user input
-    final Button generateButton = new Button("Generate New Names");
+    final Button generateButton = new Button("Generate New Name");
 
     // Initialize the background to show generated names
     private void initializeShowGeneratedNamesPane() {
@@ -52,20 +56,63 @@ public class Main extends Application implements GeneratedNamesPath {
         showNamesPane.getChildren().addAll(showNamesVBox, showNamesScrollPane);
 
         // Set the preferred size of the background
-        showNamesPane.setPrefSize(480, 875);
+        showNamesPane.setPrefSize(240, 920);
 
         // VBox size and spacing to make it look good
         showNamesVBox.setSpacing(5.0);
-        showNamesVBox.setPrefWidth(460);
+        showNamesVBox.setPrefWidth(220);
 
         // Insets to make scroll pane look good and size
         showNamesScrollPane.setPadding(new Insets(5.0, 5.0, 5.0, 5.0));
-        showNamesScrollPane.setPrefSize(480, 875);
+        showNamesScrollPane.setPrefSize(240, 920);
 
         // Set scroll pane color to dark grey and border to grey
         showNamesScrollPane.setStyle("-fx-background: #E8E8E8; -fx-border-color: #BFBFBF;");
 
         showNamesScrollPane.setContent(showNamesVBox);
+    }
+
+    // Initialize the background for user inputs
+    private void initializeUserInputPane() {
+        // Add the children to the pane
+        userInputPane.getChildren().addAll(generateButton);
+
+        // Set the prefered size of the background
+        userInputPane.setPrefSize(240, 920);
+        // Move the pane to be to the size
+        userInputPane.setLayoutX(240);
+
+        // Set the size of the button to have some padding
+        generateButton.setPrefSize(230, 35);
+        // Move the generate button to the bottom of the pane
+        generateButton.setTranslateY(875);
+
+        // Set the x position of the button to be in the center of the pane
+        generateButton.setLayoutX(5);
+        // Set the y position of the button to be in the center of the pane
+        generateButton.setLayoutY(5);
+
+        // Set pane color to dark grey and border to grey
+        userInputPane.setStyle("-fx-background: #E8E8E8; -fx-border-color: #BFBFBF;");
+
+        // Create an event for when the button is clicked
+        generateButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent r) {
+                // Generate a new name
+                String generatedName = nameGenerator.generateName();
+
+                // Make sure the name doesn't already exist in the initial names bst
+                if (initialNames.search(initialNames.getRoot(), generatedName) != null) {
+                    return;
+                }
+
+                // Add it to the generated names arraylist
+                generatedNames.add(generatedName);
+                // Add it as a text label in the ui
+                addGeneratedNameLabel(generatedName);
+            }
+        });
     }
 
     // Add a generated name as a label to show that it was added
@@ -78,41 +125,12 @@ public class Main extends Application implements GeneratedNamesPath {
         showNamesVBox.getChildren().add(generatedNameLabel);
     }
 
-    // Initialize the button to generate names
-    private void initializeGeneratePane() {
-        // Add the button to the pane
-        generatePane.getChildren().add(generateButton);
-
-        // Set the size of the pane to take up the whole screen
-        generatePane.setPrefSize(480, 45);
-        // Set the size of the button to have some padding
-        generateButton.setPrefSize(470, 35);
-
-        // Set the y position of the pane to be at the bottom
-        generatePane.setLayoutY(875);
-        // Set the x position of the button to be in the center of the pane
-        generateButton.setLayoutX(5);
-        // Set the y position of the button to be in the center of the pane
-        generateButton.setLayoutY(5);
-
-        // Set scroll pane color to dark grey and border to grey
-        generatePane.setStyle("-fx-background: #E8E8E8; -fx-border-color: #BFBFBF;");
-
-        // Create an event for when the button is clicked
-        generateButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent r) {
-                String generatedName = nameGenerator.generateName();
-                generatedNames.add(generatedName);
-                addGeneratedNameLabel(generatedName);
-            }
-        });
-    }
-
     // Read the generated names from a file
     private static void readGeneratedNamesFromFile() throws Exception {
         // Initialize the generated names array list
         generatedNames = new ArrayList<String>();
+        // Initialize the initial names bst
+        initialNames = new BinarySearchTree();
 
         // Get the file
         File generatedNamesFile = GENERATED_NAMES_PATH;
@@ -133,6 +151,11 @@ public class Main extends Application implements GeneratedNamesPath {
         String[] generatedNamesSplit = generatedNamesInFile.split(",");
         // Set the generated names arraylist to the new array list
         generatedNames = new ArrayList<String>(Arrays.asList(generatedNamesSplit));
+
+        // Loop through the names and add them to the bst
+        for (int i = 0; i < generatedNames.size(); i++) {
+            initialNames.insert(initialNames.getRoot(), generatedNames.get(i));
+        }
     }
 
     // Use a quicksort to sort the generated names alphabetically
@@ -249,11 +272,11 @@ public class Main extends Application implements GeneratedNamesPath {
         stage.setTitle("Name Generator");
 
         // Add the elements to the scene
-        root.getChildren().addAll(showNamesPane, generatePane);
+        root.getChildren().addAll(showNamesPane, userInputPane);
 
         // Initialize all elements through methods
         initializeShowGeneratedNamesPane();
-        initializeGeneratePane();
+        initializeUserInputPane();
 
         // Make sure the platform can't exit without saving
         Platform.setImplicitExit(false);
