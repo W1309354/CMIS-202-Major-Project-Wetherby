@@ -10,6 +10,7 @@ import java.util.Stack;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -17,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -45,10 +47,14 @@ public class Main extends Application implements GeneratedNamesPath {
 
     // The background of the user input pane
     private final Pane userInputPane = new Pane();
-    // The background to generate names
-    // final Pane generatePane = new Pane();
     // The button used to detect user input
     final Button generateButton = new Button("Generate New Name");
+    // The labels used to tell the user what setting the slider is
+    final Label characterLength = new Label("Max Character Length");
+    final Label generateAmount = new Label("Names Generated");
+    // The sliders for each setting
+    final Slider characterLengthSlider = new Slider(4, 23, 1);
+    final Slider generateAmountSlider = new Slider(1, 10, 1);
 
     // Initialize the background to show generated names
     private void initializeShowGeneratedNamesPane() {
@@ -75,12 +81,45 @@ public class Main extends Application implements GeneratedNamesPath {
     // Initialize the background for user inputs
     private void initializeUserInputPane() {
         // Add the children to the pane
-        userInputPane.getChildren().addAll(generateButton);
+        userInputPane.getChildren().addAll(generateButton, characterLength, generateAmount, characterLengthSlider,
+                generateAmountSlider);
+
+        // Set the settings for each slider
+        characterLengthSlider.setShowTickLabels(true);
+        generateAmountSlider.setShowTickLabels(true);
+        characterLengthSlider.setValue(10);
+
+        // Set up listeners for each slider to make sure it can only increment by 1s
+        final ChangeListener<Number> characterLengthChangeListener = (obs, old, val) -> {
+            final double roundedValue = Math.floor(val.doubleValue());
+            characterLengthSlider.valueProperty().set(roundedValue);
+        };
+
+        characterLengthSlider.valueProperty().addListener(characterLengthChangeListener);
+
+        final ChangeListener<Number> generateAmountChangeListener = (obs, old, val) -> {
+            final double roundedValue = Math.floor(val.doubleValue());
+            generateAmountSlider.valueProperty().set(roundedValue);
+        };
+
+        generateAmountSlider.valueProperty().addListener(generateAmountChangeListener);
 
         // Set the prefered size of the background
         userInputPane.setPrefSize(240, 920);
         // Move the pane to be to the size
         userInputPane.setLayoutX(240);
+
+        // Move the labels & sliders in the middle of the pane
+        characterLength.setLayoutX(67);
+        generateAmount.setLayoutX(75);
+        characterLengthSlider.setLayoutX(55);
+        generateAmountSlider.setLayoutX(55);
+
+        // Move labels & sliders down
+        characterLength.setLayoutY(5);
+        characterLengthSlider.setLayoutY(25);
+        generateAmount.setLayoutY(80);
+        generateAmountSlider.setLayoutY(100);
 
         // Set the size of the button to have some padding
         generateButton.setPrefSize(230, 35);
@@ -99,18 +138,36 @@ public class Main extends Application implements GeneratedNamesPath {
         generateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent r) {
-                // Generate a new name
-                String generatedName = nameGenerator.generateName();
+                // Max name length for generation
+                int maxNameLength = (int)characterLengthSlider.getValue();
+                // Generate names for however many times the user has specified
+                for (int i = 0; i < generateAmountSlider.getValue(); i++) {
+                    // Create the name generation thread
+                    NameGenerationThread newThread = new NameGenerationThread(nameGenerator, maxNameLength);
+                    // Create the thread
+                    Thread thread = new Thread(newThread);
+                    // Start the thread
+                    thread.start();
+                    // Join the thread
+                    try {
+                        thread.join();
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
 
-                // Make sure the name doesn't already exist in the initial names bst
-                if (initialNames.search(initialNames.getRoot(), generatedName) != null) {
-                    return;
+                    // Get the generated name
+                    String generatedName = newThread.getGeneratedName();
+
+                    // Make sure the name doesn't already exist in the initial names bst
+                    if (initialNames.search(initialNames.getRoot(), generatedName) != null) {
+                        return;
+                    }
+
+                    // Add it to the generated names arraylist
+                    generatedNames.add(generatedName);
+                    // Add it as a text label in the ui
+                    addGeneratedNameLabel(generatedName);
                 }
-
-                // Add it to the generated names arraylist
-                generatedNames.add(generatedName);
-                // Add it as a text label in the ui
-                addGeneratedNameLabel(generatedName);
             }
         });
     }
